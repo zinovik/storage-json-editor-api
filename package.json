@@ -1,0 +1,40 @@
+{
+    "name": "storage-json-editor-api",
+    "version": "0.1.0",
+    "description": "storage json editor api",
+    "main": "index.js",
+    "engines": {
+        "node": ">=18.0",
+        "npm": ">=8.0"
+    },
+    "scripts": {
+        "test": "exit 0 && jest --config jestconfig.json --coverage",
+        "build": "rm -rf dist && tsc",
+        "dev": "npm run build && GOOGLE_APPLICATION_CREDENTIALS=key-file.json npx @google-cloud/functions-framework --target=main --source=dist",
+        "deploy": "npm run build && cp package*.json dist && gcloud functions deploy storage-json-editor-api --gen2 --trigger-http --runtime nodejs20 --entry-point=main --allow-unauthenticated --region=us-central1 --source=dist --update-build-env-vars=\"GOOGLE_NODE_RUN_SCRIPTS=\" --project zinovik-project"
+    },
+    "dependencies": {
+        "@google-cloud/functions-framework": "3.3.0",
+        "@google-cloud/storage": "7.7.0",
+        "axios": "1.6.2",
+        "google-auth-library": "9.4.1"
+    },
+    "devDependencies": {
+        "@types/jest": "29.0.1",
+        "@types/node": "20.10.5",
+        "jest": "29.0.3",
+        "ts-jest": "29.0.0",
+        "typemoq": "2.1.0",
+        "typescript": "5.3.3"
+    },
+    "author": "Max Zinovik",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zinovik/storage-json-editor-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zinovik/storage-json-editor-api/issues"
+    },
+    "homepage": "https://github.com/zinovik/storage-json-editor-api#readme"
+}
