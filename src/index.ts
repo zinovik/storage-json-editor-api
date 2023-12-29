@@ -22,6 +22,16 @@ functions.http('main', async (req, res) => {
         return;
     }
 
+    if (!authorization) {
+        res.status(401).json({ error: 'authorization header is required!' });
+        return;
+    }
+
+    if (!action) {
+        res.status(422).json({ error: 'action is required!' });
+        return;
+    }
+
     const main = new Main(new GoogleAuthService(), new GoogleStorageService());
 
     const response = await main.process(authorization, action, payload);

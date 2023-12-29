@@ -47,7 +47,7 @@ export class GoogleStorageService implements StorageService {
         fileName: string,
         file: Object,
         isPublic?: boolean
-    ): Promise<void> {
+    ): Promise<string | void> {
         const bucket = this.storage.bucket(bucketName);
         const bucketFile: File = bucket.file(fileName);
         const dataBuffer = Buffer.from(JSON.stringify(file));
@@ -60,5 +60,8 @@ export class GoogleStorageService implements StorageService {
                 contentType: 'application/json',
             },
         });
+
+        if (isPublic)
+            return `https://storage.googleapis.com/hedgehogs/${fileName}`;
     }
 }

@@ -2,7 +2,11 @@ import { GoogleAuthService } from '../authorization/GoogleAuth.service';
 import { StorageService } from '../storage/Storage.interface';
 
 const ALLOWED_BUCKETS: Record<string, string[]> = {
-    'zinovik@gmail.com': ['hedgehogs', 'digital-board-games', 'gallery'],
+    'zinovik@gmail.com': [
+        'hedgehogs',
+        'digital-board-games',
+        'zinovik-gallery',
+    ],
     'puchochek@gmail.com': ['hedgehogs'],
 };
 
@@ -36,7 +40,9 @@ export class Main {
         fileNames: string[];
         file: string;
     }> {
-        const fileNames = await this.storageService.getFileNames(bucketName);
+        const fileNames = (
+            await this.storageService.getFileNames(bucketName)
+        ).filter((fileName) => fileName.endsWith('.json'));
 
         return {
             fileNames,
@@ -61,11 +67,15 @@ export class Main {
         token: string,
         action: string,
         payload: any
-    ): Promise<{
-        bucketNames?: string[];
-        fileNames?: string[];
-        file: string;
-    } | void> {
+    ): Promise<
+        | {
+              bucketNames?: string[];
+              fileNames?: string[];
+              file: string;
+          }
+        | void
+        | string
+    > {
         const email = await this.authService.verify(token);
 
         const allowedBuckets = ALLOWED_BUCKETS[email] || [];
@@ -88,11 +98,15 @@ export class Main {
                 if (!allowedBuckets.includes(payload.bucketName))
                     throw new Error();
 
+                if (!payload.fileName.endsWith('.json')) throw new Error();
+
                 return await this.getFile(payload.bucketName, payload.fileName);
 
             case 'SAVE_FILE':
                 if (!allowedBuckets.includes(payload.bucketName))
                     throw new Error();
+
+                if (!payload.fileName.endsWith('.json')) throw new Error();
 
                 return await this.storageService.saveFile(
                     payload.bucketName,
