@@ -2,9 +2,6 @@ import { Stream } from 'stream';
 import { Storage, File } from '@google-cloud/storage';
 import { StorageService } from './Storage.interface';
 
-const BUCKET_NAME = 'BUCKET_NAME';
-const FILE_NAME = 'FILE_NAME';
-
 export class GoogleStorageService implements StorageService {
     private readonly storage: Storage = new Storage();
 
