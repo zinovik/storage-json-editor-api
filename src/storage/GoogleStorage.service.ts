@@ -59,6 +59,6 @@ export class GoogleStorageService implements StorageService {
         });
 
         if (isPublic)
-            return `https://storage.googleapis.com/hedgehogs/${fileName}`;
+            return `https://storage.googleapis.com/${bucketName}/${fileName}`;
     }
 }
