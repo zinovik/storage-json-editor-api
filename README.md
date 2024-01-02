@@ -2,6 +2,13 @@
 
 ## google cloud setup
 
+### create artifact repository
+
+```bash
+gcloud services enable artifactregistry.googleapis.com
+gcloud artifacts repositories create zinovik-repository --location=us-central1 --repository-format=docker
+```
+
 ### create service account
 
 ```bash

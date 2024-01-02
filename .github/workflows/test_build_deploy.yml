@@ -32,5 +32,7 @@ jobs:
         run: gcloud auth activate-service-account --key-file key-file.json
       - name: Remove key-file.json
         run: rm key-file.json
-      - name: Build and Deploy
+      - name: Build
+        run: npm run build:cloud
+      - name: Deploy
         run: npm run deploy
