@@ -15,4 +15,4 @@ COPY src ./src
 COPY tsconfig.json ./
 
 # Build and run the app
-CMD npm run dev
+CMD npm run start
