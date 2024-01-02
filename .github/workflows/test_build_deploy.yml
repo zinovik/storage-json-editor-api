@@ -1,5 +1,5 @@
-name: Deploy to Google Cloud Functions
-run-name: Deploy to Google Cloud Functions
+name: Deploy to Google Run
+run-name: Deploy to Google Run
 on: [push]
 jobs:
   Tests:

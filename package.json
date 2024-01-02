@@ -11,8 +11,8 @@
         "test": "exit 0 && jest --config jestconfig.json --coverage",
         "build": "rm -rf dist && tsc",
         "dev": "npm run build && GOOGLE_APPLICATION_CREDENTIALS=key-file.json npx @google-cloud/functions-framework --target=main --source=dist",
-        "build:cloud": "gcloud builds submit --tag us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api --region=us-central1",
-        "deploy": "gcloud run deploy storage-json-editor-api --image us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api:latest --platform managed --region us-central1 --allow-unauthenticated"
+        "build:cloud": "gcloud builds submit --tag us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api --region=us-central1 --project zinovik-project",
+        "deploy": "gcloud run deploy storage-json-editor-api --image us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api:latest --platform managed --region us-central1 --allow-unauthenticated --project zinovik-project"
     },
     "dependencies": {
         "@google-cloud/functions-framework": "3.3.0",
