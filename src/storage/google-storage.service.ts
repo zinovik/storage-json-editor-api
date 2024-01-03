@@ -1,7 +1,9 @@
 import { Stream } from 'stream';
 import { Storage, File } from '@google-cloud/storage';
-import { StorageService } from './Storage.interface';
+import { Injectable } from '@nestjs/common';
+import { StorageService } from './storage.interface';
 
+@Injectable()
 export class GoogleStorageService implements StorageService {
     private readonly storage: Storage = new Storage();
 
