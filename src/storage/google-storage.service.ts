@@ -46,7 +46,7 @@ export class GoogleStorageService implements StorageService {
         fileName: string,
         file: Object,
         isPublic?: boolean
-    ): Promise<string | void> {
+    ): Promise<{ url: string }> {
         const bucket = this.storage.bucket(bucketName);
         const bucketFile: File = bucket.file(fileName);
         const dataBuffer = Buffer.from(JSON.stringify(file));
@@ -60,7 +60,10 @@ export class GoogleStorageService implements StorageService {
             },
         });
 
-        if (isPublic)
-            return `https://storage.googleapis.com/${bucketName}/${fileName}`;
+        return {
+            url: isPublic
+                ? `https://storage.googleapis.com/${bucketName}/${fileName}`
+                : '',
+        };
     }
 }

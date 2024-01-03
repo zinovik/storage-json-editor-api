@@ -7,5 +7,5 @@ export interface StorageService {
         fileName: string,
         file: Object,
         isPublic?: boolean
-    ): Promise<string | void>;
+    ): Promise<{ url: string }>;
 }

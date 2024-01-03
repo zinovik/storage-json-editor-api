@@ -81,7 +81,7 @@ export class StorageJsonEditorController {
             file: Object;
             isPublic?: boolean;
         }
-    ): Promise<string | void> {
+    ): Promise<{ url: string }> {
         return await this.storageService.saveFile(
             bucketName,
             fileName,
