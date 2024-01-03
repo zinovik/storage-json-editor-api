@@ -7,14 +7,14 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { StorageService } from './storage/storage.interface';
+import { GoogleStorageService } from './storage/google-storage.service';
 import { AuthGuard } from './auth.guard';
 import { GoogleAuthService } from './authorization/google-auth.service';
 
 @Controller()
 @UseGuards(new AuthGuard(new GoogleAuthService()))
 export class StorageJsonEditorController {
-    constructor(private readonly storageService: StorageService) {}
+    constructor(private readonly storageService: GoogleStorageService) {}
 
     @Get('get-bucket-names')
     async getBucketNames(
