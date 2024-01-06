@@ -7,19 +7,6 @@ import { StorageService } from './storage.interface';
 export class GoogleStorageService implements StorageService {
     private readonly storage: Storage = new Storage();
 
-    private streamToString(stream: Stream): Promise<string> {
-        const chunks: Uint8Array[] = [];
-        return new Promise((resolve, reject) => {
-            stream.on('data', (chunk: string) =>
-                chunks.push(Buffer.from(chunk))
-            );
-            stream.on('error', (error: Error) => reject(error));
-            stream.on('end', () =>
-                resolve(Buffer.concat(chunks).toString('utf8'))
-            );
-        });
-    }
-
     async getBucketNames(): Promise<string[]> {
         const [buckets] = await this.storage.getBuckets();
 
@@ -34,11 +21,9 @@ export class GoogleStorageService implements StorageService {
 
     async getFile(bucketName: string, fileName: string): Promise<string> {
         const bucket = this.storage.bucket(bucketName);
-        const file: File = bucket.file(fileName);
+        const file = await bucket.file(fileName).download();
 
-        const data = await this.streamToString(file.createReadStream());
-
-        return JSON.parse(data);
+        return JSON.parse(file.toString());
     }
 
     async saveFile(

@@ -16,58 +16,55 @@ import { GoogleAuthService } from './authorization/google-auth.service';
 export class StorageJsonEditorController {
     constructor(private readonly storageService: GoogleStorageService) {}
 
-    @Get('get-bucket-names')
-    async getBucketNames(
+    @Get('file')
+    async getFile(
+        @Query()
+        { bucketName, fileName }: { bucketName?: string; fileName?: string },
         @Req() { allowedBuckets }: { allowedBuckets: string[] }
     ): Promise<{
         bucketNames: string[];
         fileNames: string[];
-        file: string;
+        file: string | null;
     }> {
-        const bucketNames = (await this.storageService.getBucketNames()).filter(
-            (bucketName) => allowedBuckets.includes(bucketName)
+        let bucketNames;
+
+        if (!bucketName) {
+            bucketNames = (await this.storageService.getBucketNames()).filter(
+                (bucketName) => allowedBuckets.includes(bucketName)
+            );
+
+            if (bucketNames.length === 0)
+                return { bucketNames, fileNames: [], file: null };
+        }
+
+        const currentBucket = bucketName || bucketNames[0];
+
+        let fileNames;
+
+        if (!fileName) {
+            fileNames = (
+                await this.storageService.getFileNames(currentBucket)
+            ).filter((fileName) => fileName.endsWith('.json'));
+
+            if (bucketNames.length === 0)
+                return { bucketNames, fileNames, file: null };
+        }
+
+        const currentFilename = fileName || fileNames[0];
+
+        const file = await this.storageService.getFile(
+            currentBucket,
+            currentFilename
         );
 
         return {
             bucketNames,
-            ...(bucketNames.length > 0
-                ? await this.getFileNames({ bucketName: bucketNames[0] })
-                : { fileNames: [], file: null }),
-        };
-    }
-
-    @Get('get-file-names')
-    async getFileNames(
-        @Query() { bucketName }: { bucketName: string }
-    ): Promise<{
-        fileNames: string[];
-        file: string;
-    }> {
-        const fileNames = (
-            await this.storageService.getFileNames(bucketName)
-        ).filter((fileName) => fileName.endsWith('.json'));
-
-        return {
             fileNames,
-            ...(fileNames.length > 0
-                ? await this.getFile({ bucketName, fileName: fileNames[0] })
-                : { file: '' }),
+            file,
         };
     }
 
-    @Get('get-file')
-    async getFile(
-        @Query()
-        { bucketName, fileName }: { bucketName: string; fileName: string }
-    ): Promise<{
-        file: string;
-    }> {
-        const file = await this.storageService.getFile(bucketName, fileName);
-
-        return { file };
-    }
-
-    @Post('save-file')
+    @Post('file')
     async saveFile(
         @Body()
         {
