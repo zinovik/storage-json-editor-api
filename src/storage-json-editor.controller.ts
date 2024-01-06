@@ -11,12 +11,12 @@ import { GoogleStorageService } from './storage/google-storage.service';
 import { AuthGuard } from './auth.guard';
 import { GoogleAuthService } from './authorization/google-auth.service';
 
-@Controller()
+@Controller('file')
 @UseGuards(new AuthGuard(new GoogleAuthService()))
 export class StorageJsonEditorController {
     constructor(private readonly storageService: GoogleStorageService) {}
 
-    @Get('file')
+    @Get()
     async getFile(
         @Query()
         query: { 'bucket-name'?: string; 'file-name'?: string },
@@ -66,7 +66,7 @@ export class StorageJsonEditorController {
         };
     }
 
-    @Post('file')
+    @Post()
     async saveFile(
         @Body()
         {
