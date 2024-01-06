@@ -46,7 +46,7 @@ export class StorageJsonEditorController {
                 await this.storageService.getFileNames(currentBucket)
             ).filter((fileName) => fileName.endsWith('.json'));
 
-            if (bucketNames.length === 0)
+            if (fileNames.length === 0)
                 return { bucketNames, fileNames, file: null };
         }
 
