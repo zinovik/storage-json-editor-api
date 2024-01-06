@@ -5,15 +5,8 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors({
         origin: ['https://zinovik.github.io'],
+        methods: ['GET', 'POST'],
     });
     await app.listen(8080);
 }
 bootstrap();
-
-// if (method === 'OPTIONS') {
-//     res.set('Access-Control-Allow-Methods', 'GET');
-//     res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-//     res.set('Access-Control-Max-Age', '3600');
-//     res.status(204).send('');
-//     return;
-// }
