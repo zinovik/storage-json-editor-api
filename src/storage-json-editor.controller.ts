@@ -19,13 +19,15 @@ export class StorageJsonEditorController {
     @Get('file')
     async getFile(
         @Query()
-        { bucketName, fileName }: { bucketName?: string; fileName?: string },
+        query: { 'bucket-name'?: string; 'file-name'?: string },
         @Req() { allowedBuckets }: { allowedBuckets: string[] }
     ): Promise<{
         bucketNames: string[];
         fileNames: string[];
         file: string | null;
     }> {
+        const { 'bucket-name': bucketName, 'file-name': fileName } = query;
+
         let bucketNames;
 
         if (!bucketName) {
