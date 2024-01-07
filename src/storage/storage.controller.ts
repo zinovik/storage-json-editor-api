@@ -1,26 +1,16 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Post,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import { GoogleStorageService } from './storage/google-storage.service';
-import { AuthGuard } from './auth.guard';
-import { GoogleAuthService } from './authorization/google-auth.service';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { StorageService } from './storage.service';
 
 @Controller('file')
-@UseGuards(new AuthGuard(new GoogleAuthService()))
-export class StorageJsonEditorController {
-    constructor(private readonly storageService: GoogleStorageService) {}
+export class StorageController {
+    constructor(private readonly storageService: StorageService) {}
 
     @Get()
     async getFile(
         @Query()
         query: { 'bucket-name'?: string; 'file-name'?: string },
-        @Req() { allowedBuckets }: { allowedBuckets: string[] }
+        @Req()
+        { user: { allowedBuckets } }: { user: { allowedBuckets: string[] } }
     ): Promise<{
         bucketNames: string[];
         fileNames: string[];

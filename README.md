@@ -31,3 +31,15 @@ gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:
 gcloud iam service-accounts keys create key-file.json --iam-account=github-actions@appspot.gserviceaccount.com
 cat key-file.json | base64
 ```
+
+### add access to secrets
+
+```
+gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:306312319198-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
+```
+
+### add secrets
+
+```
+printf "JWT_SECRET" | gcloud secrets create storage-json-editor-api-jwt-secret --locations=us-central1 --replication-policy="user-managed" --data-file=-
+```

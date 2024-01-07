@@ -13,12 +13,13 @@
         "start": "node dist/main.js",
         "dev": "npm run build && GOOGLE_APPLICATION_CREDENTIALS=key-file.json npm run start",
         "build:cloud": "gcloud builds submit --tag us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api --region=us-central1 --project zinovik-project",
-        "deploy": "gcloud run deploy storage-json-editor-api --image us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api:latest --platform managed --region us-central1 --allow-unauthenticated --project zinovik-project"
+        "deploy": "gcloud run deploy storage-json-editor-api --image us-central1-docker.pkg.dev/zinovik-project/zinovik-repository/storage-json-editor-api:latest --platform managed --region us-central1 --allow-unauthenticated --project zinovik-project --set-secrets=JWT_SECRET=storage-json-editor-api-jwt-secret:latest"
     },
     "dependencies": {
         "@google-cloud/storage": "7.7.0",
         "@nestjs/common": "10.3.0",
         "@nestjs/core": "10.3.0",
+        "@nestjs/jwt": "10.2.0",
         "@nestjs/platform-express": "10.3.0",
         "axios": "1.6.3",
         "google-auth-library": "9.4.1",
@@ -26,6 +27,7 @@
         "rxjs": "7.8.1"
     },
     "devDependencies": {
+        "@nestjs/testing": "10.3.0",
         "@types/body-parser": "1.19.5",
         "@types/jest": "29.5.11",
         "@types/node": "20.10.6",
