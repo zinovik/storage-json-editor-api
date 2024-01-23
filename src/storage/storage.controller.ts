@@ -1,7 +1,17 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    Query,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { StorageService } from './storage.service';
+import { StorageGuard } from './storage.guard';
 
 @Controller('file')
+@UseGuards(new StorageGuard())
 export class StorageController {
     constructor(private readonly storageService: StorageService) {}
 
