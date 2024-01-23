@@ -11,6 +11,7 @@ export class UsersService {
                 'digital-board-games',
                 'zinovik-gallery',
             ],
+            isGalleryAccess: true,
         },
         {
             email: 'puchochek@gmail.com',
