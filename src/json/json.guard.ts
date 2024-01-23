@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 
 @Injectable()
-export class StorageGuard implements CanActivate {
+export class JsonGuard implements CanActivate {
     constructor() {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

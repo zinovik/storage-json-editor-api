@@ -2,7 +2,7 @@ import { Storage, File } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class StorageService {
+export class JsonService {
     private readonly storage: Storage = new Storage();
 
     async getBucketNames(): Promise<string[]> {

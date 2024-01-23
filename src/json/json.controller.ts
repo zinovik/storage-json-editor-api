@@ -7,13 +7,13 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { StorageService } from './storage.service';
-import { StorageGuard } from './storage.guard';
+import { JsonService } from './json.service';
+import { JsonGuard } from './json.guard';
 
-@Controller('file')
-@UseGuards(new StorageGuard())
-export class StorageController {
-    constructor(private readonly storageService: StorageService) {}
+@Controller('json')
+@UseGuards(new JsonGuard())
+export class JsonController {
+    constructor(private readonly jsonService: JsonService) {}
 
     @Get()
     async getFile(
@@ -31,7 +31,7 @@ export class StorageController {
         let bucketNames;
 
         if (!bucketName) {
-            bucketNames = (await this.storageService.getBucketNames()).filter(
+            bucketNames = (await this.jsonService.getBucketNames()).filter(
                 (bucketName) => allowedBuckets.includes(bucketName)
             );
 
@@ -45,7 +45,7 @@ export class StorageController {
 
         if (!fileName) {
             fileNames = (
-                await this.storageService.getFileNames(currentBucket)
+                await this.jsonService.getFileNames(currentBucket)
             ).filter((fileName) => fileName.endsWith('.json'));
 
             if (fileNames.length === 0)
@@ -54,7 +54,7 @@ export class StorageController {
 
         const currentFilename = fileName || fileNames[0];
 
-        const file = await this.storageService.getFile(
+        const file = await this.jsonService.getFile(
             currentBucket,
             currentFilename
         );
@@ -81,7 +81,7 @@ export class StorageController {
             isPublic?: boolean;
         }
     ): Promise<{ url: string }> {
-        return await this.storageService.saveFile(
+        return await this.jsonService.saveFile(
             bucketName,
             fileName,
             file,
