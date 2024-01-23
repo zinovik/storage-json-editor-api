@@ -9,12 +9,12 @@ export class StorageGuard implements CanActivate {
 
         return (
             request['user'].allowedBuckets.length !== 0 &&
-            (typeof request.query.bucketName !== 'string' ||
+            (typeof request.body.bucketName !== 'string' ||
                 request['user'].allowedBuckets.includes(
-                    request.query.bucketName
+                    request.body.bucketName
                 )) &&
-            (typeof request.query.fileName !== 'string' ||
-                request.query.fileName.endsWith('.json'))
+            (typeof request.body.fileName !== 'string' ||
+                request.body.fileName.endsWith('.json'))
         );
     }
 }
