@@ -35,6 +35,7 @@ export class AuthService {
             access_token: await this.jwtService.signAsync({
                 email: user.email,
                 allowedBuckets: user.allowedBuckets,
+                isGalleryAccess: user.isGalleryAccess,
             }),
         };
     }
