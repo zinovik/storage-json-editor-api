@@ -38,10 +38,12 @@ export class GalleryService {
         text: string | string[];
     }): Promise<void> {
         const bucket = this.storage.bucket(BUCKET_NAME);
-        const bucketFile: File = bucket.file(ALBUMS_FILE_NAME);
-        const file = await bucketFile.download();
+        const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
+        const albumsDownloadResponse = await albumsBucketFile.download();
 
-        const albums: AlbumInterface[] = JSON.parse(file.toString());
+        const albums: AlbumInterface[] = JSON.parse(
+            albumsDownloadResponse.toString()
+        );
 
         const albumsUpdated = albums.map((album) =>
             album.path === path
@@ -56,7 +58,7 @@ export class GalleryService {
 
         const dataBuffer = Buffer.from(JSON.stringify(albumsUpdated));
 
-        await bucketFile.save(dataBuffer, {
+        await albumsBucketFile.save(dataBuffer, {
             gzip: true,
             public: true,
             resumable: true,
@@ -78,10 +80,20 @@ export class GalleryService {
         text: string | string[];
     }): Promise<void> {
         const bucket = this.storage.bucket(BUCKET_NAME);
-        const bucketFile: File = bucket.file(FILES_FILE_NAME);
-        const file = await bucketFile.download();
+        const filesBucketFile: File = bucket.file(FILES_FILE_NAME);
+        const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
+        const [filesDownloadResponse, albumsDownloadResponse] =
+            await Promise.all([
+                filesBucketFile.download(),
+                albumsBucketFile.download(),
+            ]);
 
-        const files: FileInterface[] = JSON.parse(file.toString());
+        const files: FileInterface[] = JSON.parse(
+            filesDownloadResponse.toString()
+        );
+        const albums: AlbumInterface[] = JSON.parse(
+            albumsDownloadResponse.toString()
+        );
 
         const filesUpdated = files.map((file) =>
             file.filename === filename
@@ -94,9 +106,17 @@ export class GalleryService {
                 : file
         );
 
-        const dataBuffer = Buffer.from(JSON.stringify(filesUpdated));
+        const albumPaths = albums.map((album) => album.path);
 
-        await bucketFile.save(dataBuffer, {
+        const filesSorted = [...filesUpdated].sort((f1, f2) =>
+            f1.path.split('/')[0] === f2.path.split('/')[0] // the same root path
+                ? f1.filename.localeCompare(f2.filename)
+                : albumPaths.indexOf(f1.path) - albumPaths.indexOf(f2.path)
+        );
+
+        const dataBuffer = Buffer.from(JSON.stringify(filesSorted));
+
+        await filesBucketFile.save(dataBuffer, {
             gzip: true,
             public: true,
             resumable: true,
