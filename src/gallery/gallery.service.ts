@@ -1,26 +1,10 @@
 import { Storage, File } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
+import { AlbumInterface, FileInterface } from '../types';
 
 const BUCKET_NAME = 'zinovik-gallery';
 const FILES_FILE_NAME = 'files.json';
 const ALBUMS_FILE_NAME = 'albums.json';
-
-interface AlbumInterface {
-    path: string;
-    title: string;
-    text?: string | string[];
-}
-
-interface FileInterface {
-    path: string;
-    filename: string;
-    type: 'image' | 'video';
-    isTitle?: boolean;
-    isNoThumbnail?: boolean;
-    description?: string;
-    text?: string | string[];
-    isVertical?: boolean;
-}
 
 @Injectable()
 export class GalleryService {
@@ -36,7 +20,7 @@ export class GalleryService {
         newPath: string;
         title: string;
         text: string | string[];
-    }): Promise<void> {
+    }): Promise<AlbumInterface[]> {
         const bucket = this.storage.bucket(BUCKET_NAME);
         const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
         const albumsDownloadResponse = await albumsBucketFile.download();
@@ -66,6 +50,8 @@ export class GalleryService {
                 contentType: 'application/json',
             },
         });
+
+        return albumsUpdated;
     }
 
     async updateFile({
@@ -78,7 +64,7 @@ export class GalleryService {
         path: string;
         description: string;
         text: string | string[];
-    }): Promise<void> {
+    }): Promise<FileInterface[]> {
         const bucket = this.storage.bucket(BUCKET_NAME);
         const filesBucketFile: File = bucket.file(FILES_FILE_NAME);
         const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
@@ -124,5 +110,7 @@ export class GalleryService {
                 contentType: 'application/json',
             },
         });
+
+        return filesSorted;
     }
 }

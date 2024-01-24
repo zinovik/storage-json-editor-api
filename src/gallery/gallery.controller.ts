@@ -1,6 +1,7 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { GalleryGuard } from './gallery.guard';
+import { AlbumInterface, FileInterface } from '../types';
 
 @Controller('gallery')
 @UseGuards(new GalleryGuard())
@@ -21,13 +22,15 @@ export class GalleryController {
             title: string;
             text: string | string[];
         }
-    ): Promise<void> {
-        await this.galleryService.updateAlbum({
+    ): Promise<AlbumInterface[]> {
+        const albums = await this.galleryService.updateAlbum({
             path,
             newPath,
             title,
             text,
         });
+
+        return albums;
     }
 
     @Post('file')
@@ -44,12 +47,14 @@ export class GalleryController {
             description: string;
             text: string | string[];
         }
-    ): Promise<void> {
-        await this.galleryService.updateFile({
+    ): Promise<FileInterface[]> {
+        const files = await this.galleryService.updateFile({
             filename,
             path,
             description,
             text,
         });
+
+        return files;
     }
 }
