@@ -1,44 +1,59 @@
 import { Storage, File } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
-import { AlbumInterface, FileInterface } from '../types';
 
 const BUCKET_NAME = 'zinovik-gallery';
 const FILES_FILE_NAME = 'files.json';
 const ALBUMS_FILE_NAME = 'albums.json';
 
+interface AlbumInterface {
+    path: string;
+    title: string;
+    text?: string | string[];
+}
+
+interface FileInterface {
+    path: string;
+    filename: string;
+    type: 'image' | 'video';
+    isTitle?: boolean;
+    isNoThumbnail?: boolean;
+    description?: string;
+    text?: string | string[];
+    isVertical?: boolean;
+}
+
 @Injectable()
 export class GalleryService {
     private readonly storage: Storage = new Storage();
 
-    async updateAlbum({
-        path,
-        newPath,
-        title,
-        text,
-    }: {
-        path: string;
-        newPath: string;
-        title: string;
-        text: string | string[];
-    }): Promise<AlbumInterface[]> {
+    async updateAlbums(
+        albums: {
+            path: string;
+            newPath: string;
+            title: string;
+            text: string | string[];
+        }[]
+    ): Promise<void> {
         const bucket = this.storage.bucket(BUCKET_NAME);
         const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
         const albumsDownloadResponse = await albumsBucketFile.download();
 
-        const albums: AlbumInterface[] = JSON.parse(
+        const albumsOld: AlbumInterface[] = JSON.parse(
             albumsDownloadResponse.toString()
         );
 
-        const albumsUpdated = albums.map((album) =>
-            album.path === path
+        const albumsUpdated = albumsOld.map((albumOld) => {
+            const album = albums.find((album) => album.path === albumOld.path);
+
+            return album
                 ? {
-                      ...album,
-                      path: newPath,
-                      title,
-                      text: text || undefined,
+                      ...albumOld,
+                      path: album.newPath,
+                      title: album.title,
+                      text: album.text || undefined,
                   }
-                : album
-        );
+                : albumOld;
+        });
 
         const dataBuffer = Buffer.from(JSON.stringify(albumsUpdated));
 
@@ -50,21 +65,16 @@ export class GalleryService {
                 contentType: 'application/json',
             },
         });
-
-        return albumsUpdated;
     }
 
-    async updateFile({
-        filename,
-        path,
-        description,
-        text,
-    }: {
-        filename: string;
-        path: string;
-        description: string;
-        text: string | string[];
-    }): Promise<FileInterface[]> {
+    async updateFiles(
+        files: {
+            filename: string;
+            path: string;
+            description: string;
+            text: string | string[];
+        }[]
+    ): Promise<void> {
         const bucket = this.storage.bucket(BUCKET_NAME);
         const filesBucketFile: File = bucket.file(FILES_FILE_NAME);
         const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
@@ -74,23 +84,27 @@ export class GalleryService {
                 albumsBucketFile.download(),
             ]);
 
-        const files: FileInterface[] = JSON.parse(
+        const filesOld: FileInterface[] = JSON.parse(
             filesDownloadResponse.toString()
         );
         const albums: AlbumInterface[] = JSON.parse(
             albumsDownloadResponse.toString()
         );
 
-        const filesUpdated = files.map((file) =>
-            file.filename === filename
+        const filesUpdated = filesOld.map((fileOld) => {
+            const file = files.find(
+                (file) => file.filename === fileOld.filename
+            );
+
+            return file
                 ? {
-                      ...file,
-                      path,
-                      description,
-                      text: text || undefined,
+                      ...fileOld,
+                      path: file.path,
+                      description: file.description,
+                      text: file.text || undefined,
                   }
-                : file
-        );
+                : fileOld;
+        });
 
         const albumPaths = albums.map((album) => album.path);
 
@@ -110,7 +124,5 @@ export class GalleryService {
                 contentType: 'application/json',
             },
         });
-
-        return filesSorted;
     }
 }

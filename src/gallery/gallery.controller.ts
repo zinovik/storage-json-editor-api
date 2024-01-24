@@ -1,7 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { GalleryGuard } from './gallery.guard';
-import { AlbumInterface, FileInterface } from '../types';
 
 @Controller('gallery')
 @UseGuards(new GalleryGuard())
@@ -11,50 +10,40 @@ export class GalleryController {
     @Post('album')
     async updateAlbum(
         @Body()
-        {
-            path,
-            newPath,
-            title,
-            text,
-        }: {
+        albums: {
             path: string;
             newPath: string;
             title: string;
             text: string | string[];
-        }
-    ): Promise<AlbumInterface[]> {
-        const albums = await this.galleryService.updateAlbum({
-            path,
-            newPath,
-            title,
-            text,
-        });
-
-        return albums;
+        }[]
+    ): Promise<void> {
+        await this.galleryService.updateAlbums(
+            albums.map((album) => ({
+                path: album.path,
+                newPath: album.newPath,
+                title: album.title,
+                text: album.text,
+            }))
+        );
     }
 
     @Post('file')
     async updateFile(
         @Body()
-        {
-            filename,
-            path,
-            description,
-            text,
-        }: {
+        files: {
             filename: string;
             path: string;
             description: string;
             text: string | string[];
-        }
-    ): Promise<FileInterface[]> {
-        const files = await this.galleryService.updateFile({
-            filename,
-            path,
-            description,
-            text,
-        });
-
-        return files;
+        }[]
+    ): Promise<void> {
+        await this.galleryService.updateFiles(
+            files.map((file) => ({
+                filename: file.filename,
+                path: file.path,
+                description: file.description,
+                text: file.text,
+            }))
+        );
     }
 }
