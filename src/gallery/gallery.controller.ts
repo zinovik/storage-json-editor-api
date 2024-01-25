@@ -27,6 +27,8 @@ export class GalleryController {
             };
         }
     ): Promise<void> {
+        console.log(JSON.stringify(body));
+
         const shouldUpdateAlbums =
             body.update.albums && body.update.albums.length > 0;
         const shouldUpdateFiles =
