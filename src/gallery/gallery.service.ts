@@ -26,38 +26,43 @@ interface FileInterface {
 export class GalleryService {
     private readonly storage: Storage = new Storage();
 
-    async updateAlbums(
-        albums: {
-            path: string;
-            newPath: string;
-            title: string;
-            text: string | string[];
-        }[]
-    ): Promise<void> {
+    async getAlbums(): Promise<AlbumInterface[]> {
         const bucket = this.storage.bucket(BUCKET_NAME);
         const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
         const albumsDownloadResponse = await albumsBucketFile.download();
 
-        const albumsOld: AlbumInterface[] = JSON.parse(
-            albumsDownloadResponse.toString()
-        );
+        return JSON.parse(albumsDownloadResponse.toString());
+    }
 
-        const albumsUpdated = albumsOld.map((albumOld) => {
-            const album = albums.find((album) => album.path === albumOld.path);
-
-            return album
-                ? {
-                      ...albumOld,
-                      path: album.newPath,
-                      title: album.title,
-                      text: album.text || undefined,
-                  }
-                : albumOld;
-        });
-
-        const dataBuffer = Buffer.from(JSON.stringify(albumsUpdated));
+    async saveAlbums(albums: AlbumInterface[]): Promise<void> {
+        const bucket = this.storage.bucket(BUCKET_NAME);
+        const albumsBucketFile: File = bucket.file(ALBUMS_FILE_NAME);
+        const dataBuffer = Buffer.from(JSON.stringify(albums));
 
         await albumsBucketFile.save(dataBuffer, {
+            gzip: true,
+            public: true,
+            resumable: true,
+            metadata: {
+                contentType: 'application/json',
+            },
+        });
+    }
+
+    async getFiles(): Promise<FileInterface[]> {
+        const bucket = this.storage.bucket(BUCKET_NAME);
+        const filesBucketFile: File = bucket.file(FILES_FILE_NAME);
+        const filesDownloadResponse = await filesBucketFile.download();
+
+        return JSON.parse(filesDownloadResponse.toString());
+    }
+
+    async saveFiles(files: FileInterface[]): Promise<void> {
+        const bucket = this.storage.bucket(BUCKET_NAME);
+        const filesBucketFile: File = bucket.file(FILES_FILE_NAME);
+        const dataBuffer = Buffer.from(JSON.stringify(files));
+
+        await filesBucketFile.save(dataBuffer, {
             gzip: true,
             public: true,
             resumable: true,
