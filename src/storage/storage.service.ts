@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 const PUBLIC_BUCKETS = ['digital-board-games', 'zinovik-gallery'];
 
 @Injectable()
-export class JsonService {
+export class StorageService {
     private readonly storage: Storage = new Storage();
 
     async getBucketNames(): Promise<string[]> {
@@ -19,7 +19,7 @@ export class JsonService {
         return files.map((file) => file.name);
     }
 
-    async getFile(bucketName: string, fileName: string): Promise<string> {
+    async getFile(bucketName: string, fileName: string): Promise<Object> {
         const bucket = this.storage.bucket(bucketName);
         const file = await bucket.file(fileName).download();
 

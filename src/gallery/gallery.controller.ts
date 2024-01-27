@@ -1,6 +1,30 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { GalleryService } from './gallery.service';
 import { GalleryGuard } from './gallery.guard';
+import { StorageService } from '../storage/storage.service';
+
+const BUCKET_NAME = 'zinovik-gallery';
+const FILES_FILE_NAME = 'files.json';
+const ALBUMS_FILE_NAME = 'albums.json';
+
+interface AlbumInterface {
+    path: string;
+    title: string;
+    text?: string | string[];
+    isSorted?: true;
+}
+
+interface FileInterface {
+    path: string;
+    filename: string;
+    type: 'image' | 'video';
+    url: string;
+    datetime: string;
+    isTitle?: true;
+    isNoThumbnail?: true;
+    description?: string;
+    text?: string | string[];
+    isVertical?: true;
+}
 
 interface UpdatedAlbum {
     path: string;
@@ -19,7 +43,7 @@ interface UpdatedFile {
 @Controller('gallery')
 @UseGuards(new GalleryGuard())
 export class GalleryController {
-    constructor(private readonly galleryService: GalleryService) {}
+    constructor(private readonly storageService: StorageService) {}
 
     @Post()
     async update(
@@ -39,10 +63,12 @@ export class GalleryController {
         const shouldUpdateFiles =
             body.update?.files && body.update.files.length > 0;
 
-        const [albumsOld, filesOld] = await Promise.all([
-            this.galleryService.getAlbums(),
-            ...(shouldUpdateFiles ? [this.galleryService.getFiles()] : []),
-        ]);
+        const [albumsOld, filesOld] = (await Promise.all([
+            this.storageService.getFile(BUCKET_NAME, ALBUMS_FILE_NAME),
+            ...(shouldUpdateFiles
+                ? [this.storageService.getFile(BUCKET_NAME, FILES_FILE_NAME)]
+                : []),
+        ])) as [AlbumInterface[], FileInterface[]];
 
         let mutableAlbumsUpdated = albumsOld;
 
@@ -83,7 +109,11 @@ export class GalleryController {
                 return 0;
             });
 
-            await this.galleryService.saveAlbums(mutableAlbumsUpdated);
+            await this.storageService.saveFile(
+                BUCKET_NAME,
+                ALBUMS_FILE_NAME,
+                mutableAlbumsUpdated
+            );
         }
 
         if (shouldUpdateFiles) {
@@ -110,7 +140,11 @@ export class GalleryController {
                     : albumPaths.indexOf(f1.path) - albumPaths.indexOf(f2.path)
             );
 
-            await this.galleryService.saveFiles(filesSorted);
+            await this.storageService.saveFile(
+                BUCKET_NAME,
+                FILES_FILE_NAME,
+                filesSorted
+            );
         }
     }
 }

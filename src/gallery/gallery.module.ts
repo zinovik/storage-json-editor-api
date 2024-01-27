@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { GalleryController } from './gallery.controller';
-import { GalleryService } from './gallery.service';
+import { StorageService } from '../storage/storage.service';
 import { AuthModule } from '../auth/auth.module';
-import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [AuthModule, UsersModule],
+    imports: [AuthModule],
     controllers: [GalleryController],
-    providers: [GalleryService],
+    providers: [StorageService],
 })
 export class GalleryModule {}

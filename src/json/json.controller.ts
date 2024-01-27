@@ -7,13 +7,13 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { JsonService } from './json.service';
+import { StorageService } from '../storage/storage.service';
 import { JsonGuard } from './json.guard';
 
 @Controller('json')
 @UseGuards(new JsonGuard())
 export class JsonController {
-    constructor(private readonly jsonService: JsonService) {}
+    constructor(private readonly storageService: StorageService) {}
 
     @Get()
     async getFile(
@@ -24,14 +24,14 @@ export class JsonController {
     ): Promise<{
         bucketNames: string[];
         fileNames: string[];
-        file: string | null;
+        file: Object | null;
     }> {
         const { 'bucket-name': bucketName, 'file-name': fileName } = query;
 
         let bucketNames;
 
         if (!bucketName) {
-            bucketNames = (await this.jsonService.getBucketNames()).filter(
+            bucketNames = (await this.storageService.getBucketNames()).filter(
                 (bucketName) => allowedBuckets.includes(bucketName)
             );
 
@@ -45,7 +45,7 @@ export class JsonController {
 
         if (!fileName) {
             fileNames = (
-                await this.jsonService.getFileNames(currentBucket)
+                await this.storageService.getFileNames(currentBucket)
             ).filter((fileName) => fileName.endsWith('.json'));
 
             if (fileNames.length === 0)
@@ -54,7 +54,7 @@ export class JsonController {
 
         const currentFilename = fileName || fileNames[0];
 
-        const file = await this.jsonService.getFile(
+        const file = await this.storageService.getFile(
             currentBucket,
             currentFilename
         );
@@ -79,6 +79,6 @@ export class JsonController {
             file: Object;
         }
     ): Promise<{ url: string }> {
-        return await this.jsonService.saveFile(bucketName, fileName, file);
+        return await this.storageService.saveFile(bucketName, fileName, file);
     }
 }
