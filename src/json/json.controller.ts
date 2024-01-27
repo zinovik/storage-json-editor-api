@@ -73,19 +73,12 @@ export class JsonController {
             bucketName,
             fileName,
             file,
-            isPublic,
         }: {
             bucketName: string;
             fileName: string;
             file: Object;
-            isPublic?: boolean;
         }
     ): Promise<{ url: string }> {
-        return await this.jsonService.saveFile(
-            bucketName,
-            fileName,
-            file,
-            isPublic
-        );
+        return await this.jsonService.saveFile(bucketName, fileName, file);
     }
 }

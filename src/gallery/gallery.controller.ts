@@ -2,6 +2,20 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { GalleryGuard } from './gallery.guard';
 
+interface UpdatedAlbum {
+    path: string;
+    newPath: string;
+    title: string;
+    text: string | string[];
+}
+
+interface UpdatedFile {
+    filename: string;
+    path: string;
+    description: string;
+    text: string | string[];
+}
+
 @Controller('gallery')
 @UseGuards(new GalleryGuard())
 export class GalleryController {
@@ -11,28 +25,19 @@ export class GalleryController {
     async update(
         @Body()
         body: {
-            update: {
-                albums?: {
-                    path: string;
-                    newPath: string;
-                    title: string;
-                    text: string | string[];
-                }[];
-                files?: {
-                    filename: string;
-                    path: string;
-                    description: string;
-                    text: string | string[];
-                }[];
+            add: {};
+            update?: {
+                albums?: UpdatedAlbum[];
+                files?: UpdatedFile[];
             };
         }
     ): Promise<void> {
         console.log(JSON.stringify(body));
 
         const shouldUpdateAlbums =
-            body.update.albums && body.update.albums.length > 0;
+            body.update?.albums && body.update.albums.length > 0;
         const shouldUpdateFiles =
-            body.update.files && body.update.files.length > 0;
+            body.update?.files && body.update.files.length > 0;
 
         const [albumsOld, filesOld] = await Promise.all([
             this.galleryService.getAlbums(),
@@ -42,7 +47,7 @@ export class GalleryController {
         let mutableAlbumsUpdated = albumsOld;
 
         if (shouldUpdateAlbums) {
-            mutableAlbumsUpdated = albumsOld.map((albumOld) => {
+            const albumsUpdated = albumsOld.map((albumOld) => {
                 const album = body.update.albums.find(
                     (album) => album.path === albumOld.path
                 );
@@ -55,6 +60,27 @@ export class GalleryController {
                           text: album.text || undefined,
                       }
                     : albumOld;
+            });
+
+            const sortedAlbums = albumsUpdated
+                .filter((album) => album.isSorted)
+                .map((album) => album.path);
+
+            mutableAlbumsUpdated = [...albumsUpdated].sort((a1, a2) => {
+                if (a1.path.split('/')[0] !== a2.path.split('/')[0]) {
+                    return 0;
+                }
+
+                // the same root path
+
+                // is sorted album
+                if (sortedAlbums.includes(a1.path.split('/')[0]))
+                    return a1.path.localeCompare(a2.path);
+
+                if (a2.path.includes(a1.path)) return -1;
+                if (a1.path.includes(a2.path)) return 1;
+
+                return 0;
             });
 
             await this.galleryService.saveAlbums(mutableAlbumsUpdated);
