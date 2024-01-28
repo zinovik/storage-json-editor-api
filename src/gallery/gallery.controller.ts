@@ -26,6 +26,21 @@ interface FileInterface {
     isVertical?: true;
 }
 
+interface AddedAlbum {
+    pathPart: string;
+    title: string;
+    text: string | string[];
+    relatedPath: string;
+    relation: 'after' | 'before' | 'in';
+}
+
+interface AddedFile {
+    filename: string;
+    path: string;
+    description: string;
+    text: string | string[];
+}
+
 interface UpdatedAlbum {
     path: string;
     newPath: string;
@@ -49,7 +64,10 @@ export class GalleryController {
     async update(
         @Body()
         body: {
-            add: {};
+            add?: {
+                albums?: AddedAlbum[];
+                files?: AddedFile[];
+            };
             update?: {
                 albums?: UpdatedAlbum[];
                 files?: UpdatedFile[];
@@ -58,6 +76,8 @@ export class GalleryController {
     ): Promise<void> {
         console.log(JSON.stringify(body));
 
+        const shouldAddFiles = body.add?.files && body.add.files.length > 0;
+
         const shouldUpdateAlbums =
             body.update?.albums && body.update.albums.length > 0;
         const shouldUpdateFiles =
@@ -65,7 +85,7 @@ export class GalleryController {
 
         const [albumsOld, filesOld] = (await Promise.all([
             this.storageService.getFile(BUCKET_NAME, ALBUMS_FILE_NAME),
-            ...(shouldUpdateFiles
+            ...(shouldAddFiles || shouldUpdateFiles
                 ? [this.storageService.getFile(BUCKET_NAME, FILES_FILE_NAME)]
                 : []),
         ])) as [AlbumInterface[], FileInterface[]];
@@ -116,7 +136,7 @@ export class GalleryController {
             );
         }
 
-        if (shouldUpdateFiles) {
+        if (shouldAddFiles || shouldUpdateFiles) {
             const filesUpdated = filesOld.map((fileOld) => {
                 const file = body?.update?.files.find(
                     (file) => file.filename === fileOld.filename
