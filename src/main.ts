@@ -7,6 +7,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors({
         origin: ['https://zinovik.github.io'],
+        credentials: true,
     });
     app.use(json({ limit: '5mb' }));
     app.use(cookieParser());
