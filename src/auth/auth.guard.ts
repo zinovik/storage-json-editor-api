@@ -20,6 +20,7 @@ export class AuthGuard implements CanActivate {
         if (isPublic) return true;
 
         const request = context.switchToHttp().getRequest();
+        console.log('cookies', request.cookies); //
         const token = this.extractTokenFromHeader(request);
 
         if (!token) {
