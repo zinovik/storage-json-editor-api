@@ -41,8 +41,9 @@ export class StorageService {
             gzip: true,
             public: isPublic,
             resumable: true,
+            contentType: 'application/json',
             metadata: {
-                contentType: 'application/json',
+                cacheControl: 'no-cache',
             },
         });
 

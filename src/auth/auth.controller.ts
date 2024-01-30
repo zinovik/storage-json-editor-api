@@ -28,7 +28,12 @@ export class AuthController {
     ) {
         const { access_token } = await this.authService.signIn(token);
 
-        response.cookie('access_token', access_token);
+        response.cookie('access_token', access_token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
 
         return { access_token };
     }
