@@ -8,6 +8,7 @@ async function bootstrap() {
     app.enableCors({
         origin: ['https://zinovik.github.io'],
         credentials: true,
+        exposedHeaders: ['set-cookie'],
     });
     app.use(json({ limit: '5mb' }));
     app.use(cookieParser());
