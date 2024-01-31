@@ -11,7 +11,9 @@ import { AuthGuard } from './auth.guard';
         UsersModule,
         JwtModule.register({
             global: true,
-            secret: process.env['JWT_SECRET'],
+            secret: process.env.DEVELOPMENT
+                ? 'local-development-secret'
+                : process.env['JWT_SECRET'],
             signOptions: { expiresIn: '1h' },
         }),
     ],

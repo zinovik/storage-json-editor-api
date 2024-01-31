@@ -6,9 +6,10 @@ import { json } from 'body-parser';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors({
-        origin: ['https://zinovik.github.io'],
+        origin: process.env.DEVELOPMENT
+            ? 'http://localhost:4000'
+            : 'https://zinovik.github.io',
         credentials: true,
-        exposedHeaders: ['set-cookie'],
     });
     app.use(json({ limit: '5mb' }));
     app.use(cookieParser());
