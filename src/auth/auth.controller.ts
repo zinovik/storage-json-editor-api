@@ -26,16 +26,16 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response,
         @Body() { token }: { token: string }
     ) {
-        const { access_token } = await this.authService.signIn(token);
+        const { accessToken, user } = await this.authService.signIn(token);
 
-        response.cookie('access_token', access_token, {
+        response.cookie('access_token', accessToken, {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        return {};
+        return user;
     }
 
     @UseGuards(AuthGuard)

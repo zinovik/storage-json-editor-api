@@ -2,6 +2,7 @@ import { LoginTicket, OAuth2Client } from 'google-auth-library';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { User } from '../common/user';
 
 const CLIENT_ID =
     '306312319198-u9h4e07khciuet8hnj00b8fvmq25rlj0.apps.googleusercontent.com';
@@ -15,7 +16,7 @@ export class AuthService {
         private jwtService: JwtService
     ) {}
 
-    async signIn(token: string): Promise<{ access_token: string }> {
+    async signIn(token: string): Promise<{ accessToken: string; user: User }> {
         let ticket: LoginTicket;
 
         try {
@@ -36,11 +37,12 @@ export class AuthService {
         const user = await this.usersService.findOne(payload.email);
 
         return {
-            access_token: await this.jwtService.signAsync({
+            accessToken: await this.jwtService.signAsync({
                 email: user.email,
                 allowedBuckets: user.allowedBuckets,
                 isGalleryAccess: user.isGalleryAccess,
             }),
+            user,
         };
     }
 }
