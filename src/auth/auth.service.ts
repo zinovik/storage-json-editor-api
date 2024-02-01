@@ -37,11 +37,14 @@ export class AuthService {
         const user = await this.usersService.findOne(payload.email);
 
         return {
-            accessToken: await this.jwtService.signAsync({
-                email: user.email,
-                allowedBuckets: user.allowedBuckets,
-                isGalleryAccess: user.isGalleryAccess,
-            }),
+            accessToken: await this.jwtService.signAsync(
+                {
+                    email: user.email,
+                    allowedBuckets: user.allowedBuckets,
+                    isGalleryAccess: user.isGalleryAccess,
+                },
+                { expiresIn: `24h` }
+            ),
             user,
         };
     }
