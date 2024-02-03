@@ -31,11 +31,19 @@ export class AuthGuard implements CanActivate {
                 secret: process.env['JWT_SECRET'],
             });
 
+            const csrf = this.extractCSRFTokenFromHeader(request);
+
+            if (csrf !== payload.csrf) throw new UnauthorizedException();
+
             request['user'] = payload;
         } catch {
             throw new UnauthorizedException();
         }
 
         return true;
+    }
+
+    private extractCSRFTokenFromHeader(request: Request): string | undefined {
+        return (request.headers as any).authorization;
     }
 }
