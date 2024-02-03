@@ -26,7 +26,9 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response,
         @Body() { token }: { token: string }
     ) {
-        const { accessToken, user } = await this.authService.signIn(token);
+        const { accessToken, user, csrf } = await this.authService.signIn(
+            token
+        );
 
         response.cookie('access_token', accessToken, {
             httpOnly: true,
@@ -35,7 +37,7 @@ export class AuthController {
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        return user;
+        return { user, csrf };
     }
 
     @UseGuards(AuthGuard)

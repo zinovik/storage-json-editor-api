@@ -16,7 +16,24 @@ export class AuthService {
         private jwtService: JwtService
     ) {}
 
-    async signIn(token: string): Promise<{ accessToken: string; user: User }> {
+    private generateCSRF(length: number) {
+        let result = '';
+
+        const characters =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+        while (result.length < length) {
+            result += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            );
+        }
+
+        return result;
+    }
+
+    async signIn(
+        token: string
+    ): Promise<{ accessToken: string; user: User; csrf: string }> {
         let ticket: LoginTicket;
 
         try {
@@ -35,6 +52,7 @@ export class AuthService {
         const payload = ticket.getPayload();
 
         const user = await this.usersService.findOne(payload.email);
+        const csrf = this.generateCSRF(32);
 
         return {
             accessToken: await this.jwtService.signAsync(
@@ -42,10 +60,12 @@ export class AuthService {
                     email: user.email,
                     allowedBuckets: user.allowedBuckets,
                     isGalleryAccess: user.isGalleryAccess,
+                    csrf,
                 },
                 { expiresIn: `24h` }
             ),
             user,
+            csrf,
         };
     }
 }
