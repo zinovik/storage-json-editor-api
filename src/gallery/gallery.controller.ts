@@ -112,6 +112,8 @@ export class GalleryController {
 
         let mutableAlbumsUpdated = albumsOld;
 
+        // TODO: Save in Promise.all
+
         if (shouldAddAlbums || shouldUpdateAlbums || shouldRemoveAlbums) {
             const albumsWithAdded = shouldAddAlbums
                 ? this.addAlbums(albumsOld, body.add.albums)
@@ -220,8 +222,26 @@ export class GalleryController {
             // the same root path
 
             // is sorted album
-            if (sortedAlbums.includes(a1.path.split('/')[0]))
-                return a1.path.localeCompare(a2.path);
+            if (sortedAlbums.includes(a1.path.split('/')[0])) {
+                const a1PathParts = a1.path.split('/');
+                const a2PathParts = a2.path.split('/');
+
+                if (a1PathParts.length === a2PathParts.length)
+                    return a1.path.localeCompare(a2.path);
+
+                const minPathParts = Math.min(
+                    a1PathParts.length,
+                    a2PathParts.length
+                );
+
+                for (let i = 0; i < minPathParts; i++) {
+                    if (a1PathParts[i] !== a2PathParts[i]) {
+                        if (a1PathParts[i] === undefined) return -1;
+                        if (a2PathParts[i] === undefined) return -1;
+                        return a2PathParts[i].localeCompare(a2PathParts[i]);
+                    }
+                }
+            }
 
             if (a2.path.includes(a1.path)) return -1;
             if (a1.path.includes(a2.path)) return 1;
