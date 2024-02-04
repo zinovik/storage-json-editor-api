@@ -1,10 +1,13 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GalleryGuard } from './gallery.guard';
 import { StorageService } from '../storage/storage.service';
+import { GoogleAuth } from 'google-auth-library';
 
 const BUCKET_NAME = 'zinovik-gallery';
 const FILES_FILE_NAME = 'files.json';
 const ALBUMS_FILE_NAME = 'albums.json';
+const MEDIA_URLS_UPDATER =
+    'https://us-central1-zinovik-project.cloudfunctions.net/media-urls-updater';
 
 interface AlbumInterface {
     path: string;
@@ -64,6 +67,19 @@ interface RemovedFile {
 @UseGuards(new GalleryGuard())
 export class GalleryController {
     constructor(private readonly storageService: StorageService) {}
+
+    @Post('media-urls-updater')
+    async mediaUrlsUpdater() {
+        const auth = new GoogleAuth();
+        const client = await auth.getIdTokenClient(MEDIA_URLS_UPDATER);
+
+        const { data } = await client.request({
+            url: MEDIA_URLS_UPDATER,
+            method: 'GET',
+        });
+
+        return data;
+    }
 
     @Post()
     async update(
