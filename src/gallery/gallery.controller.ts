@@ -121,7 +121,7 @@ export class GalleryController {
             shouldUpdateFiles
                 ? [this.storageService.getFile(BUCKET_NAME, ALBUMS_FILE_NAME)]
                 : []),
-            ...(shouldAddFiles || shouldUpdateFiles || shouldRemoveFiles
+            ...(shouldRemoveFiles || shouldAddFiles || shouldUpdateFiles
                 ? [this.storageService.getFile(BUCKET_NAME, FILES_FILE_NAME)]
                 : []),
         ])) as [AlbumInterface[], FileInterface[]];
@@ -136,7 +136,7 @@ export class GalleryController {
                 : albumsOld;
             const albumsWithAdded = shouldAddAlbums
                 ? this.addAlbums(albumsWithoutRemoved, body.add.albums)
-                : albumsOld;
+                : albumsWithoutRemoved;
             const albumsUpdated = shouldUpdateAlbums
                 ? this.updateAlbums(albumsWithAdded, body.update.albums)
                 : albumsWithAdded;
@@ -155,7 +155,7 @@ export class GalleryController {
                 : filesOld;
             const filesWithAdded = shouldAddFiles
                 ? this.addFiles(filesWithoutRemoved, body.add.files)
-                : filesOld;
+                : filesWithoutRemoved;
             const filesUpdated = shouldUpdateFiles
                 ? this.updateFiles(filesWithAdded, body.update.files)
                 : filesWithAdded;
