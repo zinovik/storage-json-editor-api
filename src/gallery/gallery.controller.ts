@@ -26,6 +26,14 @@ interface FileInterface {
     isVertical?: true;
 }
 
+interface RemovedAlbum {
+    path: string;
+}
+
+interface RemovedFile {
+    filename: string;
+}
+
 interface AddedAlbum {
     pathPart: string;
     title: string;
@@ -43,24 +51,16 @@ interface AddedFile {
 
 interface UpdatedAlbum {
     path: string;
-    newPath: string;
-    title: string;
-    text: string | string[];
+    newPath?: string;
+    title?: string;
+    text?: string | string[];
 }
 
 interface UpdatedFile {
     filename: string;
-    path: string;
-    description: string;
-    text: string | string[];
-}
-
-interface RemovedAlbum {
-    path: string;
-}
-
-interface RemovedFile {
-    filename: string;
+    path?: string;
+    description?: string;
+    text?: string | string[];
 }
 
 @Controller('gallery')
@@ -85,6 +85,10 @@ export class GalleryController {
     async update(
         @Body()
         body: {
+            remove?: {
+                albums?: RemovedAlbum[];
+                files?: RemovedFile[];
+            };
             add?: {
                 albums?: AddedAlbum[];
                 files?: AddedFile[];
@@ -93,32 +97,28 @@ export class GalleryController {
                 albums?: UpdatedAlbum[];
                 files?: UpdatedFile[];
             };
-            remove?: {
-                albums?: RemovedAlbum[];
-                files?: RemovedFile[];
-            };
         }
     ): Promise<void> {
         console.log(JSON.stringify(body));
 
+        const shouldRemoveAlbums =
+            body.remove?.albums && body.remove.albums.length > 0;
+        const shouldRemoveFiles =
+            body.remove?.files && body.remove.files.length > 0;
         const shouldAddAlbums = body.add?.albums && body.add.albums.length > 0;
         const shouldAddFiles = body.add?.files && body.add.files.length > 0;
         const shouldUpdateAlbums =
             body.update?.albums && body.update.albums.length > 0;
         const shouldUpdateFiles =
             body.update?.files && body.update.files.length > 0;
-        const shouldRemoveAlbums =
-            body.remove?.albums && body.remove.albums.length > 0;
-        const shouldRemoveFiles =
-            body.remove?.files && body.remove.files.length > 0;
 
         const [albumsOld, filesOld] = (await Promise.all([
-            ...(shouldAddAlbums ||
+            ...(shouldRemoveAlbums ||
+            shouldAddAlbums ||
             shouldUpdateAlbums ||
-            shouldRemoveAlbums ||
+            shouldRemoveFiles ||
             shouldAddFiles ||
-            shouldUpdateFiles ||
-            shouldRemoveFiles
+            shouldUpdateFiles
                 ? [this.storageService.getFile(BUCKET_NAME, ALBUMS_FILE_NAME)]
                 : []),
             ...(shouldAddFiles || shouldUpdateFiles || shouldRemoveFiles
@@ -130,17 +130,17 @@ export class GalleryController {
 
         // TODO: Save in Promise.all
 
-        if (shouldAddAlbums || shouldUpdateAlbums || shouldRemoveAlbums) {
+        if (shouldRemoveAlbums || shouldAddAlbums || shouldUpdateAlbums) {
+            const albumsWithoutRemoved = shouldRemoveAlbums
+                ? this.removeAlbums(albumsOld, body.remove.albums)
+                : albumsOld;
             const albumsWithAdded = shouldAddAlbums
-                ? this.addAlbums(albumsOld, body.add.albums)
+                ? this.addAlbums(albumsWithoutRemoved, body.add.albums)
                 : albumsOld;
             const albumsUpdated = shouldUpdateAlbums
                 ? this.updateAlbums(albumsWithAdded, body.update.albums)
                 : albumsWithAdded;
-            const albumsSorted = this.sortAlbums(albumsUpdated);
-            mutableAlbumsUpdated = shouldRemoveAlbums
-                ? this.removeAlbums(albumsSorted, body.remove.albums)
-                : albumsSorted;
+            const mutableAlbumsUpdated = this.sortAlbums(albumsUpdated);
 
             await this.storageService.saveFile(
                 BUCKET_NAME,
@@ -149,9 +149,12 @@ export class GalleryController {
             );
         }
 
-        if (shouldAddFiles || shouldUpdateFiles || shouldRemoveFiles) {
+        if (shouldRemoveFiles || shouldAddFiles || shouldUpdateFiles) {
+            const filesWithoutRemoved = shouldRemoveFiles
+                ? this.removeFiles(filesOld, body.remove.files)
+                : filesOld;
             const filesWithAdded = shouldAddFiles
-                ? this.addFiles(filesOld, body.add.files)
+                ? this.addFiles(filesWithoutRemoved, body.add.files)
                 : filesOld;
             const filesUpdated = shouldUpdateFiles
                 ? this.updateFiles(filesWithAdded, body.update.files)
@@ -160,16 +163,25 @@ export class GalleryController {
                 filesUpdated,
                 mutableAlbumsUpdated
             );
-            const filesWithoutRemoved = shouldRemoveFiles
-                ? this.removeFiles(filesSorted, body.remove.files)
-                : filesSorted;
 
             await this.storageService.saveFile(
                 BUCKET_NAME,
                 FILES_FILE_NAME,
-                filesWithoutRemoved
+                filesSorted
             );
         }
+    }
+
+    private removeAlbums(
+        albums: AlbumInterface[],
+        removedAlbums: RemovedAlbum[]
+    ): AlbumInterface[] {
+        return albums.filter(
+            (album) =>
+                !removedAlbums.some(
+                    (removedAlbum) => removedAlbum.path === album.path
+                )
+        );
     }
 
     private addAlbums(
@@ -209,19 +221,25 @@ export class GalleryController {
         albums: AlbumInterface[],
         updateAlbums: UpdatedAlbum[]
     ): AlbumInterface[] {
-        return albums.map((albums) => {
-            const updateAlbum = updateAlbums.find(
-                (updateAlbum) => updateAlbum.path === albums.path
+        return albums.map((album) => {
+            const updatedAlbum = updateAlbums.find(
+                (updatedAlbum) => updatedAlbum.path === album.path
             );
 
-            return updateAlbum
+            return updatedAlbum
                 ? {
-                      ...albums,
-                      path: updateAlbum.newPath,
-                      title: updateAlbum.title,
-                      text: updateAlbum.text || undefined,
+                      ...album,
+                      ...(updatedAlbum.newPath
+                          ? { path: updatedAlbum.newPath }
+                          : {}),
+                      ...(updatedAlbum.title
+                          ? { title: updatedAlbum.title }
+                          : {}),
+                      ...(updatedAlbum.text
+                          ? { text: updatedAlbum.text || undefined }
+                          : {}),
                   }
-                : albums;
+                : album;
         });
     }
 
@@ -266,14 +284,14 @@ export class GalleryController {
         });
     }
 
-    private removeAlbums(
-        albums: AlbumInterface[],
-        removedAlbums: RemovedAlbum[]
-    ): AlbumInterface[] {
-        return albums.filter(
-            (album) =>
-                !removedAlbums.some(
-                    (removedAlbum) => removedAlbum.path === album.path
+    private removeFiles(
+        files: FileInterface[],
+        removedFiles: RemovedFile[]
+    ): FileInterface[] {
+        return files.filter(
+            (file) =>
+                !removedFiles.some(
+                    (removedFile) => removedFile.filename === file.filename
                 )
         );
     }
@@ -295,19 +313,23 @@ export class GalleryController {
         files: FileInterface[],
         updatedFiles: UpdatedFile[]
     ): FileInterface[] {
-        return files.map((files) => {
+        return files.map((file) => {
             const updatedFile = updatedFiles.find(
-                (updatedFile) => updatedFile.filename === files.filename
+                (updatedFile) => updatedFile.filename === file.filename
             );
 
             return updatedFile
                 ? {
-                      ...files,
-                      path: updatedFile.path,
-                      description: updatedFile.description,
-                      text: updatedFile.text || undefined,
+                      ...file,
+                      ...(updatedFile.path ? { path: updatedFile.path } : {}),
+                      ...(updatedFile.description
+                          ? { description: updatedFile.description }
+                          : {}),
+                      ...(updatedFile.text !== undefined
+                          ? { text: updatedFile.text || undefined }
+                          : {}),
                   }
-                : files;
+                : file;
         });
     }
 
@@ -321,18 +343,6 @@ export class GalleryController {
             f1.path.split('/')[0] === f2.path.split('/')[0] // the same root path
                 ? f1.filename.localeCompare(f2.filename)
                 : albumPaths.indexOf(f1.path) - albumPaths.indexOf(f2.path)
-        );
-    }
-
-    private removeFiles(
-        files: FileInterface[],
-        removedFiles: RemovedFile[]
-    ): FileInterface[] {
-        return files.filter(
-            (file) =>
-                !removedFiles.some(
-                    (removedFile) => removedFile.filename === file.filename
-                )
         );
     }
 }
