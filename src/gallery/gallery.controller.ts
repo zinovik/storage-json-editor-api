@@ -21,7 +21,7 @@ interface FileInterface {
     filename: string;
     isTitle?: true;
     isNoThumbnail?: true;
-    description?: string;
+    description: string;
     text?: string | string[];
     isVertical?: true;
 }
