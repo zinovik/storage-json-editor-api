@@ -206,6 +206,8 @@ export class GalleryController {
                     path:
                         addedAlbum.relation === 'in'
                             ? `${addedAlbum.relatedPath}/${addedAlbum.pathPart}`
+                            : addedAlbum.relatedPath.split('/').length === 1
+                            ? addedAlbum.pathPart
                             : `${addedAlbum.relatedPath.slice(
                                   0,
                                   addedAlbum.relatedPath.lastIndexOf('/')
