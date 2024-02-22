@@ -237,7 +237,7 @@ export class GalleryController {
                       ...(updatedAlbum.title
                           ? { title: updatedAlbum.title }
                           : {}),
-                      ...(updatedAlbum.text
+                      ...(updatedAlbum.text !== undefined
                           ? { text: updatedAlbum.text || undefined }
                           : {}),
                   }
