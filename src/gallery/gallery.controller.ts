@@ -7,7 +7,7 @@ const BUCKET_NAME = 'zinovik-gallery';
 const FILES_FILE_NAME = 'files.json';
 const ALBUMS_FILE_NAME = 'albums.json';
 const MEDIA_URLS_UPDATER =
-    'https://us-central1-zinovik-project.cloudfunctions.net/media-urls-updater';
+    'https://europe-central2-zinovik-project.cloudfunctions.net/media-urls-updater';
 
 interface AlbumInterface {
     path: string;

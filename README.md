@@ -6,7 +6,7 @@
 
 ```bash
 gcloud services enable artifactregistry.googleapis.com
-gcloud artifacts repositories create zinovik-repository --location=us-central1 --repository-format=docker
+gcloud artifacts repositories create zinovik-repository --location=europe-central2 --repository-format=docker
 ```
 
 ### create service account
@@ -41,5 +41,5 @@ gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:
 ### add secrets
 
 ```
-printf "JWT_SECRET" | gcloud secrets create storage-json-editor-api-jwt-secret --locations=us-central1 --replication-policy="user-managed" --data-file=-
+printf "JWT_SECRET" | gcloud secrets create storage-json-editor-api-jwt-secret --locations=europe-central2 --replication-policy="user-managed" --data-file=-
 ```
