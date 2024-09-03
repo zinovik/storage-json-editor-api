@@ -1,7 +1,7 @@
 import { Storage, File } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
 
-const PUBLIC_BUCKETS = ['digital-board-games', 'zinovik-gallery'];
+const PUBLIC_BUCKETS = ['digital-board-games'];
 const SORTED_FILES = ['digital-board-games.json'];
 
 @Injectable()

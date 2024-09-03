@@ -59,7 +59,6 @@ export class AuthService {
                 {
                     email: user.email,
                     allowedBuckets: user.allowedBuckets,
-                    isGalleryAccess: user.isGalleryAccess,
                     csrf,
                 },
                 { expiresIn: `24h` }
