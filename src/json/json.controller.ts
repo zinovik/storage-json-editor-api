@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { StorageService } from '../storage/storage.service';
 import { JsonGuard } from './json.guard';
+import { User } from '../common/user';
 
 @Controller('json')
 @UseGuards(new JsonGuard())
@@ -20,11 +21,12 @@ export class JsonController {
         @Query()
         query: { 'bucket-name'?: string; 'file-name'?: string },
         @Req()
-        { user: { allowedBuckets } }: { user: { allowedBuckets: string[] } }
+        { user }: { user: User }
     ): Promise<{
         bucketNames: string[];
         fileNames: string[];
         file: Object | null;
+        user: User;
     }> {
         const { 'bucket-name': bucketName, 'file-name': fileName } = query;
 
@@ -32,11 +34,11 @@ export class JsonController {
 
         if (!bucketName) {
             bucketNames = (await this.storageService.getBucketNames()).filter(
-                (bucketName) => allowedBuckets.includes(bucketName)
+                (bucketName) => user.allowedBuckets.includes(bucketName)
             );
 
             if (bucketNames.length === 0)
-                return { bucketNames, fileNames: [], file: null };
+                return { bucketNames, fileNames: [], file: null, user };
         }
 
         const currentBucket = bucketName || bucketNames[0];
@@ -49,7 +51,7 @@ export class JsonController {
             ).filter((fileName) => fileName.endsWith('.json'));
 
             if (fileNames.length === 0)
-                return { bucketNames, fileNames, file: null };
+                return { bucketNames, fileNames, file: null, user };
         }
 
         const currentFilename = fileName || fileNames[0];
@@ -63,6 +65,7 @@ export class JsonController {
             bucketNames,
             fileNames,
             file,
+            user,
         };
     }
 
