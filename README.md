@@ -13,6 +13,7 @@ gcloud artifacts repositories create zinovik-repository --location=europe-centra
 
 ```bash
 gcloud iam service-accounts create github-actions
+gcloud iam service-accounts create storage-json-editor
 ```
 
 ### add roles (`Service Account User`, `Cloud Build Service Account` and `Viewer`) to the service account you want to use to deploy the cloud run
@@ -32,10 +33,16 @@ gcloud iam service-accounts keys create key-file.json --iam-account=github-actio
 cat key-file.json | base64
 ```
 
-### add access to secrets
+### add access to secrets and buckets
 
-```
-gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:306312319198-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
+```bash
+gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
+
+gcloud storage buckets add-iam-policy-binding gs://zinovik-gallery --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
+
+gcloud storage buckets add-iam-policy-binding gs://digital-board-games --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
+
+gcloud storage buckets add-iam-policy-binding gs://hedgehogs --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
 ```
 
 ### add secrets

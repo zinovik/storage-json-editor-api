@@ -8,12 +8,6 @@ const SORTED_FILES = ['digital-board-games.json'];
 export class StorageService {
     private readonly storage: Storage = new Storage();
 
-    async getBucketNames(): Promise<string[]> {
-        const [buckets] = await this.storage.getBuckets();
-
-        return buckets.map((bucket) => bucket.name);
-    }
-
     async getFileNames(bucketName: string): Promise<string[]> {
         const [files] = await this.storage.bucket(bucketName).getFiles();
 

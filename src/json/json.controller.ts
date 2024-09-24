@@ -30,18 +30,11 @@ export class JsonController {
     }> {
         const { 'bucket-name': bucketName, 'file-name': fileName } = query;
 
-        let bucketNames;
-
-        if (!bucketName) {
-            bucketNames = (await this.storageService.getBucketNames()).filter(
-                (bucketName) => user.allowedBuckets.includes(bucketName)
-            );
-
-            if (bucketNames.length === 0)
-                return { bucketNames, fileNames: [], file: null, user };
+        if (!bucketName && user.allowedBuckets.length === 0) {
+            return { bucketNames: [], fileNames: [], file: null, user };
         }
 
-        const currentBucket = bucketName || bucketNames[0];
+        const currentBucket = bucketName || user.allowedBuckets[0];
 
         let fileNames;
 
@@ -51,7 +44,12 @@ export class JsonController {
             ).filter((fileName) => fileName.endsWith('.json'));
 
             if (fileNames.length === 0)
-                return { bucketNames, fileNames, file: null, user };
+                return {
+                    bucketNames: user.allowedBuckets,
+                    fileNames,
+                    file: null,
+                    user,
+                };
         }
 
         const currentFilename = fileName || fileNames[0];
@@ -62,7 +60,7 @@ export class JsonController {
         );
 
         return {
-            bucketNames,
+            bucketNames: user.allowedBuckets,
             fileNames,
             file,
             user,
