@@ -9,7 +9,7 @@ gcloud services enable artifactregistry.googleapis.com
 gcloud artifacts repositories create zinovik-repository --location=europe-central2 --repository-format=docker
 ```
 
-### create service account
+### create service accounts
 
 ```bash
 gcloud iam service-accounts create github-actions
@@ -29,7 +29,7 @@ gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:
 ### creating keys for service account for github-actions `GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_FILE`
 
 ```bash
-gcloud iam service-accounts keys create key-file.json --iam-account=github-actions@appspot.gserviceaccount.com
+gcloud iam service-accounts keys create key-file.json --iam-account=github-actions@zinovik-project.iam.gserviceaccount.com
 cat key-file.json | base64
 ```
 
@@ -47,6 +47,6 @@ gcloud storage buckets add-iam-policy-binding gs://hedgehogs --member="serviceAc
 
 ### add secrets
 
-```
+```bash
 printf "JWT_SECRET" | gcloud secrets create storage-json-editor-api-jwt-secret --locations=europe-central2 --replication-policy="user-managed" --data-file=-
 ```
