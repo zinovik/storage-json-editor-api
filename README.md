@@ -43,6 +43,8 @@ gcloud storage buckets add-iam-policy-binding gs://zinovik-gallery --member="ser
 gcloud storage buckets add-iam-policy-binding gs://digital-board-games --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
 
 gcloud storage buckets add-iam-policy-binding gs://hedgehogs --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
+
+gcloud storage buckets add-iam-policy-binding gs://ai-zinovik-bot --member="serviceAccount:storage-json-editor@zinovik-project.iam.gserviceaccount.com" --role="roles/storage.admin"
 ```
 
 ### add secrets
