@@ -9,12 +9,12 @@ export class JsonGuard implements CanActivate {
 
         return (
             request['user'].allowedBuckets.length !== 0 &&
-            (typeof request.body.bucketName !== 'string' ||
+            (typeof request.body?.bucketName !== 'string' ||
                 request['user'].allowedBuckets.includes(
-                    request.body.bucketName
+                    request.body?.bucketName
                 )) &&
-            (typeof request.body.fileName !== 'string' ||
-                request.body.fileName.endsWith('.json'))
+            (typeof request.body?.fileName !== 'string' ||
+                request.body?.fileName?.endsWith('.json'))
         );
     }
 }
