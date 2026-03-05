@@ -10,7 +10,6 @@ export class UsersService {
                 'hedgehogs',
                 'digital-board-games',
                 'zinovik-gallery',
-                'ai-zinovik-bot',
             ],
         },
         {
