@@ -41,7 +41,10 @@ export class JsonController {
         if (!fileName) {
             fileNames = (
                 await this.storageService.getFileNames(currentBucket)
-            ).filter((fileName) => fileName.endsWith('.json'));
+            ).filter(
+                (fileName) =>
+                    fileName.endsWith('.json') || fileName.endsWith('.csv')
+            );
 
             if (fileNames.length === 0)
                 return {
@@ -77,7 +80,7 @@ export class JsonController {
         }: {
             bucketName: string;
             fileName: string;
-            file: Object;
+            file: Object | string;
         }
     ): Promise<{ url: string }> {
         return await this.storageService.saveFile(bucketName, fileName, file);

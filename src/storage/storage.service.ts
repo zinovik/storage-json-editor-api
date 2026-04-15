@@ -18,20 +18,26 @@ export class StorageService {
         const bucket = this.storage.bucket(bucketName);
         const file = await bucket.file(fileName).download();
 
-        return JSON.parse(file.toString());
+        return fileName.endsWith('.json')
+            ? JSON.parse(file.toString())
+            : file.toString();
     }
 
     async saveFile(
         bucketName: string,
         fileName: string,
-        file: Object
+        file: Object | string
     ): Promise<{ url: string }> {
         const bucket = this.storage.bucket(bucketName);
         const bucketFile: File = bucket.file(fileName);
         const dataBuffer = Buffer.from(
-            JSON.stringify(
-                SORTED_FILES.includes(fileName) ? this.sortKeys(file) : file
-            )
+            fileName.endsWith('.json')
+                ? JSON.stringify(
+                      SORTED_FILES.includes(fileName)
+                          ? this.sortKeys(file)
+                          : file
+                  )
+                : (file as string)
         );
 
         const isPublic = PUBLIC_BUCKETS.includes(bucketName);
@@ -40,7 +46,9 @@ export class StorageService {
             gzip: true,
             public: isPublic,
             resumable: true,
-            contentType: 'application/json',
+            contentType: fileName.endsWith('.json')
+                ? 'application/json'
+                : 'text/csv',
             metadata: {
                 cacheControl: 'no-cache',
             },

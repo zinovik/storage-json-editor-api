@@ -14,7 +14,8 @@ export class JsonGuard implements CanActivate {
                     request.body?.bucketName
                 )) &&
             (typeof request.body?.fileName !== 'string' ||
-                request.body?.fileName?.endsWith('.json'))
+                request.body?.fileName?.endsWith('.json') ||
+                request.body?.fileName?.endsWith('.csv'))
         );
     }
 }
